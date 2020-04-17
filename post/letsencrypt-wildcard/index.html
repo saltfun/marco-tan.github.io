@@ -1,0 +1,224 @@
+<html lang="zh">
+<head>
+    <meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+<title>Let&#39;s Encrypt 通配符证书申请 | Marco Tan</title>
+<meta name="description" content="Life is full of ups and downs." />
+<link rel="shortcut icon" href="https://tmk.im/favicon.ico" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.7.2/css/all.min.css" />
+<link rel="stylesheet" href="https://tmk.im/styles/main.css" />
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlightjs@9.12.0/styles/atom-one-dark.css" />
+    <script src="https://cdn.jsdelivr.net/npm/highlightjs@9.12.0/highlight.pack.min.js"></script>
+
+
+</head>
+<body>
+<div class="main">
+    <div class="sidebar">
+    <div class="site-header">
+    <a href="https://tmk.im">
+        <img class="avatar" src="https://tmk.im/images/avatar.png" alt="Avatar" />
+    </a>
+    <h1 class="site-title">
+        Marco Tan
+    </h1>
+    <p class="site-description">
+        Life is full of ups and downs.
+    </p>
+    <div class="menu-container">
+        
+            
+                <a href="/" class="menu">首页</a>
+            
+        
+            
+                <a href="/archives" class="menu">归档</a>
+            
+        
+            
+                <a href="/tags" class="menu">标签</a>
+            
+        
+            
+                <a href="/post/about" class="menu">关于</a>
+            
+        
+    </div>
+    <div class="social-container">
+        
+            
+                <a href="https://github.com/marco-tan" target="_blank">
+                    <i class="fab fa-github"></i>
+                </a>
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+    </div>
+</div>
+
+    <div class="site-footer">
+    Designed By Tmk.&lt;tmk#li.cm&gt; |
+    <a class="rss" href="https://tmk.im/atom.xml" target="_blank">RSS</a>
+</div>
+
+    <div id="drawer-handler" style="user-select: none"><i class="fa fa-bars"></i></div>
+</div>
+
+    <div class="main-content">
+        <div class="post-detail">
+            <article class="post">
+                <h2 class="post-title">Let&#39;s Encrypt 通配符证书申请</h2>
+                <div class="post-info">
+                    <span>2019-07-18</span>
+                    <span>1 min read</span>
+                    
+                        <a href="https://tmk.im/tag/mccChmN9nd/" class="post-tag"># Let&#39;s Encrypt</a>
+                    
+                        <a href="https://tmk.im/tag/iMFsU83P6-/" class="post-tag"># HTTPS</a>
+                    
+                        <a href="https://tmk.im/tag/7arfFIjM7s/" class="post-tag"># SSL</a>
+                    
+                        <a href="https://tmk.im/tag/d0enKwElFe/" class="post-tag"># 证书</a>
+                    
+                        <a href="https://tmk.im/tag/_qNZ6FkBEF/" class="post-tag"># 通配符</a>
+                    
+                </div>
+                
+                <div class="post-content-wrapper">
+                    <div class="post-content">
+                        <ol>
+<li>获取certbot-auto</li>
+</ol>
+<pre><code class="language-bash">wget https://dl.eff.org/certbot-auto
+</code></pre>
+<ol start="2">
+<li>添加执行权限</li>
+</ol>
+<pre><code class="language-bash">chmod u+x certbot-auto
+</code></pre>
+<ol start="3">
+<li>申请证书</li>
+</ol>
+<pre><code class="language-bash">sudo ./certbot-auto --server https://acme-v02.api.letsencrypt.org/directory --manual --preferred-challenges dns-01 certonly  -d &quot;*.your-domain.com&quot;
+</code></pre>
+<p>将<code>your-domain.com</code>替换成你的域名<br>
+4. 添加域名TXT记录</p>
+<p>添加一条 <code>_acme-challenge.your-domain.com</code> 的TXT记录，记录值为第三步生成的文本。<br>
+5. 申请结束</p>
+<p>可根据<code>dig _acme-challenge.your-domain.com txt</code>查询TXT记录是否生效，证书生成成功后保存在 <code>/etc/letsencrypt/live/your-domain.com/</code> 中，有效期为三个月，重新生成证书命令 <code>certbot-auto renew</code>。</p>
+
+                    </div>
+                    <div class="toc-container">
+                        
+                    </div>
+                </div>
+            </article>
+        </div>
+
+        
+
+        
+            
+
+            
+                <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/disqusjs@1.1.1/dist/disqusjs.css" />
+<script src="https://cdn.jsdelivr.net/npm/disqusjs@1.1.1/dist/disqus.min.js"></script>
+
+<div id="disqus_thread"></div>
+
+<script>
+  var options = {
+    shortname: 'marco-tan',
+    apikey: 'FGnM8aNTiwmiRXyL5lhPYJ95JlyNldmO4odvdGQ5KaXUyPUOM58d6mp7eF8XT2nd',
+  };
+  if ('https://disqus.skk.moe/disqus/') {
+    options.api = 'https://disqus.skk.moe/disqus/';
+  }
+  var dsqjs = new DisqusJS(options);
+</script>
+
+            
+        
+    </div>
+</div>
+</body>
+<script>
+  hljs.initHighlightingOnLoad();
+
+  var mainNavLinks = document.querySelectorAll('.markdownIt-TOC a');
+
+  window.addEventListener('scroll', function () {
+    var fromTop = window.scrollY;
+    mainNavLinks.forEach((link, index) => {
+      var section = document.getElementById(decodeURI(link.hash).substring(1));
+      var nextSection = null;
+      if (mainNavLinks[index + 1]) {
+        nextSection = document.getElementById(decodeURI(mainNavLinks[index + 1].hash).substring(1));
+      }
+      if (section.offsetTop <= fromTop) {
+        if (nextSection) {
+          if (nextSection.offsetTop > fromTop) {
+            link.classList.add('current');
+          } else {
+            link.classList.remove('current');
+          }
+        } else {
+          link.classList.add('current');
+        }
+      } else {
+        link.classList.remove('current');
+      }
+    });
+  });
+</script>
+<script>
+  // 固定侧边栏footer
+  var sidebar = document.getElementsByClassName('sidebar').item(0);
+  var header = sidebar.getElementsByClassName('site-header').item(0);
+  var footer = sidebar.getElementsByClassName('site-footer').item(0);
+  if (header.clientHeight + footer.clientHeight < sidebar.clientHeight) {
+    footer.classList.add('fix');
+  }
+  // 侧边栏开关
+  var handler = document.getElementById('drawer-handler');
+  handler.addEventListener('click', function () {
+    sidebar.classList.toggle('show');
+  });
+  var mainContent = document.getElementsByClassName('main-content').item(0);
+  mainContent.addEventListener('click', function () {
+    if (sidebar.classList.contains('show')) {
+      sidebar.classList.remove('show');
+    }
+  });
+</script>
+<script>
+  var _mtac = {'senseQuery': 1};
+  (function() {
+    var mta = document.createElement('script');
+    mta.src = '//pingjs.qq.com/h5/stats.js?v2.0.4';
+    mta.setAttribute('name', 'MTAH5');
+    mta.setAttribute('sid', '500716509');
+    mta.setAttribute('cid', '500716510');
+    var s = document.getElementsByTagName('script')[0];
+    s.parentNode.insertBefore(mta, s);
+  })();
+</script>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-163768698-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'UA-163768698-1');
+</script>
+
+</html>

@@ -1,0 +1,228 @@
+<html lang="zh">
+<head>
+    <meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+<title>SSH 快速登录 | Marco Tan</title>
+<meta name="description" content="Life is full of ups and downs." />
+<link rel="shortcut icon" href="https://tmk.im/favicon.ico" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.7.2/css/all.min.css" />
+<link rel="stylesheet" href="https://tmk.im/styles/main.css" />
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlightjs@9.12.0/styles/atom-one-dark.css" />
+    <script src="https://cdn.jsdelivr.net/npm/highlightjs@9.12.0/highlight.pack.min.js"></script>
+
+
+</head>
+<body>
+<div class="main">
+    <div class="sidebar">
+    <div class="site-header">
+    <a href="https://tmk.im">
+        <img class="avatar" src="https://tmk.im/images/avatar.png" alt="Avatar" />
+    </a>
+    <h1 class="site-title">
+        Marco Tan
+    </h1>
+    <p class="site-description">
+        Life is full of ups and downs.
+    </p>
+    <div class="menu-container">
+        
+            
+                <a href="/" class="menu">首页</a>
+            
+        
+            
+                <a href="/archives" class="menu">归档</a>
+            
+        
+            
+                <a href="/tags" class="menu">标签</a>
+            
+        
+            
+                <a href="/post/about" class="menu">关于</a>
+            
+        
+    </div>
+    <div class="social-container">
+        
+            
+                <a href="https://github.com/marco-tan" target="_blank">
+                    <i class="fab fa-github"></i>
+                </a>
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+    </div>
+</div>
+
+    <div class="site-footer">
+    Designed By Tmk.&lt;tmk#li.cm&gt; |
+    <a class="rss" href="https://tmk.im/atom.xml" target="_blank">RSS</a>
+</div>
+
+    <div id="drawer-handler" style="user-select: none"><i class="fa fa-bars"></i></div>
+</div>
+
+    <div class="main-content">
+        <div class="post-detail">
+            <article class="post">
+                <h2 class="post-title">SSH 快速登录</h2>
+                <div class="post-info">
+                    <span>2020-02-03</span>
+                    <span>1 min read</span>
+                    
+                        <a href="https://tmk.im/tag/nZ-UcOTEa/" class="post-tag"># SSH</a>
+                    
+                </div>
+                
+                <div class="post-content-wrapper">
+                    <div class="post-content">
+                        <h2 id="省略ip-用户名-端口">省略IP、用户名、端口</h2>
+<p>编辑<code>~/.ssh/config</code>文件</p>
+<pre><code>Host alias1
+    HostName 6.6.6.6
+    User root
+    Port 22
+
+Host alias2
+    HostName 8.8.8.8
+    User root
+    Port 22
+</code></pre>
+<p>修改完成后使用<code>ssh alias1</code>，再输入密码即可登录</p>
+<h2 id="省略密码">省略密码</h2>
+<p>将<code>~/.ssh/id_rsa.pub</code>配置到服务器的<code>~/.ssh/authorized_keys</code>文件中，即可直接通过<code>ssh alias1</code>登录</p>
+
+                    </div>
+                    <div class="toc-container">
+                        <ul class="markdownIt-TOC">
+<li>
+<ul>
+<li><a href="#%E7%9C%81%E7%95%A5ip-%E7%94%A8%E6%88%B7%E5%90%8D-%E7%AB%AF%E5%8F%A3">省略IP、用户名、端口</a></li>
+<li><a href="#%E7%9C%81%E7%95%A5%E5%AF%86%E7%A0%81">省略密码</a></li>
+</ul>
+</li>
+</ul>
+
+                    </div>
+                </div>
+            </article>
+        </div>
+
+        
+            <div class="next-post">
+                <div class="next">下一篇</div>
+                <a href="https://tmk.im/post/ts-koa/">
+                    <h3 class="post-title">
+                        使用TypeScript编写Koa应用
+                    </h3>
+                </a>
+            </div>
+        
+
+        
+            
+
+            
+                <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/disqusjs@1.1.1/dist/disqusjs.css" />
+<script src="https://cdn.jsdelivr.net/npm/disqusjs@1.1.1/dist/disqus.min.js"></script>
+
+<div id="disqus_thread"></div>
+
+<script>
+  var options = {
+    shortname: 'marco-tan',
+    apikey: 'FGnM8aNTiwmiRXyL5lhPYJ95JlyNldmO4odvdGQ5KaXUyPUOM58d6mp7eF8XT2nd',
+  };
+  if ('https://disqus.skk.moe/disqus/') {
+    options.api = 'https://disqus.skk.moe/disqus/';
+  }
+  var dsqjs = new DisqusJS(options);
+</script>
+
+            
+        
+    </div>
+</div>
+</body>
+<script>
+  hljs.initHighlightingOnLoad();
+
+  var mainNavLinks = document.querySelectorAll('.markdownIt-TOC a');
+
+  window.addEventListener('scroll', function () {
+    var fromTop = window.scrollY;
+    mainNavLinks.forEach((link, index) => {
+      var section = document.getElementById(decodeURI(link.hash).substring(1));
+      var nextSection = null;
+      if (mainNavLinks[index + 1]) {
+        nextSection = document.getElementById(decodeURI(mainNavLinks[index + 1].hash).substring(1));
+      }
+      if (section.offsetTop <= fromTop) {
+        if (nextSection) {
+          if (nextSection.offsetTop > fromTop) {
+            link.classList.add('current');
+          } else {
+            link.classList.remove('current');
+          }
+        } else {
+          link.classList.add('current');
+        }
+      } else {
+        link.classList.remove('current');
+      }
+    });
+  });
+</script>
+<script>
+  // 固定侧边栏footer
+  var sidebar = document.getElementsByClassName('sidebar').item(0);
+  var header = sidebar.getElementsByClassName('site-header').item(0);
+  var footer = sidebar.getElementsByClassName('site-footer').item(0);
+  if (header.clientHeight + footer.clientHeight < sidebar.clientHeight) {
+    footer.classList.add('fix');
+  }
+  // 侧边栏开关
+  var handler = document.getElementById('drawer-handler');
+  handler.addEventListener('click', function () {
+    sidebar.classList.toggle('show');
+  });
+  var mainContent = document.getElementsByClassName('main-content').item(0);
+  mainContent.addEventListener('click', function () {
+    if (sidebar.classList.contains('show')) {
+      sidebar.classList.remove('show');
+    }
+  });
+</script>
+<script>
+  var _mtac = {'senseQuery': 1};
+  (function() {
+    var mta = document.createElement('script');
+    mta.src = '//pingjs.qq.com/h5/stats.js?v2.0.4';
+    mta.setAttribute('name', 'MTAH5');
+    mta.setAttribute('sid', '500716509');
+    mta.setAttribute('cid', '500716510');
+    var s = document.getElementsByTagName('script')[0];
+    s.parentNode.insertBefore(mta, s);
+  })();
+</script>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-163768698-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'UA-163768698-1');
+</script>
+
+</html>

@@ -1,0 +1,335 @@
+<html lang="zh">
+<head>
+    <meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+<title>Ngrok + Let&#39;s Encrypt 实现内网穿透 | Marco Tan</title>
+<meta name="description" content="Life is full of ups and downs." />
+<link rel="shortcut icon" href="https://tmk.im/favicon.ico" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.7.2/css/all.min.css" />
+<link rel="stylesheet" href="https://tmk.im/styles/main.css" />
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlightjs@9.12.0/styles/atom-one-dark.css" />
+    <script src="https://cdn.jsdelivr.net/npm/highlightjs@9.12.0/highlight.pack.min.js"></script>
+
+
+</head>
+<body>
+<div class="main">
+    <div class="sidebar">
+    <div class="site-header">
+    <a href="https://tmk.im">
+        <img class="avatar" src="https://tmk.im/images/avatar.png" alt="Avatar" />
+    </a>
+    <h1 class="site-title">
+        Marco Tan
+    </h1>
+    <p class="site-description">
+        Life is full of ups and downs.
+    </p>
+    <div class="menu-container">
+        
+            
+                <a href="/" class="menu">首页</a>
+            
+        
+            
+                <a href="/archives" class="menu">归档</a>
+            
+        
+            
+                <a href="/tags" class="menu">标签</a>
+            
+        
+            
+                <a href="/post/about" class="menu">关于</a>
+            
+        
+    </div>
+    <div class="social-container">
+        
+            
+                <a href="https://github.com/marco-tan" target="_blank">
+                    <i class="fab fa-github"></i>
+                </a>
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+    </div>
+</div>
+
+    <div class="site-footer">
+    Designed By Tmk.&lt;tmk#li.cm&gt; |
+    <a class="rss" href="https://tmk.im/atom.xml" target="_blank">RSS</a>
+</div>
+
+    <div id="drawer-handler" style="user-select: none"><i class="fa fa-bars"></i></div>
+</div>
+
+    <div class="main-content">
+        <div class="post-detail">
+            <article class="post">
+                <h2 class="post-title">Ngrok + Let&#39;s Encrypt 实现内网穿透</h2>
+                <div class="post-info">
+                    <span>2019-09-24</span>
+                    <span>3 min read</span>
+                    
+                        <a href="https://tmk.im/tag/EvA8hK9E1P/" class="post-tag"># ngrok</a>
+                    
+                        <a href="https://tmk.im/tag/mccChmN9nd/" class="post-tag"># Let&#39;s Encrypt</a>
+                    
+                        <a href="https://tmk.im/tag/iMFsU83P6-/" class="post-tag"># HTTPS</a>
+                    
+                        <a href="https://tmk.im/tag/7arfFIjM7s/" class="post-tag"># SSL</a>
+                    
+                        <a href="https://tmk.im/tag/d0enKwElFe/" class="post-tag"># 证书</a>
+                    
+                </div>
+                
+                <div class="post-content-wrapper">
+                    <div class="post-content">
+                        <h2 id="所需材料">所需材料</h2>
+<ul>
+<li>一台有公网IP的服务器</li>
+<li>域名</li>
+<li>放行80、443、4443端口</li>
+</ul>
+<h2 id="测试环境">测试环境</h2>
+<p>Debian 9.9</p>
+<h2 id="步骤">步骤</h2>
+<h3 id="1更新">1.更新</h3>
+<p><code>apt-get update &amp;&amp; apt-get upgrade</code></p>
+<h3 id="2安装git和go">2.安装git和go</h3>
+<p><code>apt-get install build-essential git golang</code></p>
+<h3 id="3下载源码">3.下载源码</h3>
+<p><code>git clone https://github.com/inconshreveable/ngrok --depth=1</code></p>
+<h3 id="4配置域名-生成通配符证书">4.配置域名 &amp; 生成通配符证书</h3>
+<p><strong>解析<code>ngrok.example.com</code>和<code>*.ngrok.example.com</code> A记录到服务器IP</strong></p>
+<p>提供两种生成方式，任选其一，将<code>example.com</code>修改为自己的域名即可。</p>
+<h4 id="一-命令行生成推荐">一、命令行生成（推荐）</h4>
+<pre><code class="language-bash">wget https://dl.eff.org/certbot-auto
+chmod u+x certbot-auto
+sudo ./certbot-auto --server https://acme-v02.api.letsencrypt.org/directory --manual --preferred-challenges dns-01 certonly  -d &quot;*.ngrok.example.com,ngrok.example.com&quot;
+</code></pre>
+<p>按要求添加TXT记录，证书生成后保存在<code>/etc/letsencrypt/live/ngrok.example.com</code></p>
+<h4 id="二-freesslcn-生成">二、freessl.cn 生成</h4>
+<p>生成成功后会提供<code>CA证书</code>、<code>证书</code>、<code>私钥</code>文件，分别对应的文件名为<code>chain.pem</code>、<code>cert.pem</code>、<code>privkey.pem</code></p>
+<h3 id="5配置证书">5.配置证书</h3>
+<p>在<code>ngrok</code>目录下</p>
+<ol>
+<li>将<code>chain.pem</code>复制到<code>assets/client/tls/ngrokroot.crt</code></li>
+<li>将<code>cert.pem</code>复制到<code>ngrok</code>目录下</li>
+<li>将<code>privekey.pem</code>复制到<code>ngrok</code>目录下</li>
+</ol>
+<pre><code class="language-bash">cp /etc/letsencrypt/live/ngrok.example.com/chain.pem assets/client/tls/ngrokroot.crt
+cp /etc/letsencrypt/live/ngrok.example.com/cert.pem ./
+cp /etc/letsencrypt/live/ngrok.example.com/privkey.pem ./
+</code></pre>
+<h3 id="6编译服务端">6.编译服务端</h3>
+<pre><code class="language-bash">make release-server
+</code></pre>
+<p>编译成功后在<code>bin</code>目录下的<code>ngrokd</code>即为Ngrok服务端程序</p>
+<h3 id="7编译客户端">7.编译客户端</h3>
+<h4 id="一-mac">一、Mac</h4>
+<pre><code class="language-bash">GOOS=darwin GOARCH=amd64 make release-client
+</code></pre>
+<h4 id="二-windows">二、Windows</h4>
+<pre><code class="language-bash">GOOS=windows GOARCH=amd64 make release-client
+</code></pre>
+<h4 id="三-linux">三、Linux</h4>
+<pre><code class="language-bash">GOOS=linux GOARCH=amd64 make release-client
+</code></pre>
+<h3 id="8启动服务端">8.启动服务端</h3>
+<pre><code class="language-bash">./bin/ngrokd -tlsKey=privkey.pem -tlsCrt=cert.pem -domain=&quot;ngrok.example.com&quot;
+</code></pre>
+<p>后台运行在命令后加一个<code>&amp;</code>即可</p>
+<h3 id="9设置客户端">9.设置客户端</h3>
+<h4 id="一-创建配置文件">一、创建配置文件</h4>
+<pre><code class="language-yaml">server_addr: &quot;ngrok.example.com:4443&quot;  
+trust_host_root_certs: true  
+</code></pre>
+<p>保存为<code>ngrok.yml</code></p>
+<h4 id="二-启动服务">二、启动服务</h4>
+<p><code>80</code>可修改</p>
+<h5 id="imaclinux">Ⅰ.Mac/Linux</h5>
+<pre><code class="language-bash">./ngrok -config=ngrok.yml 80
+</code></pre>
+<h5 id="iiwindows">Ⅱ.Windows</h5>
+<p>创建一个<code>start.bat</code>文件</p>
+<pre><code class="language-bat">@echo on
+cd %cd%
+ngrok -config=ngrok.yml 80
+</code></pre>
+<h3 id="10补充">10.补充</h3>
+<h4 id="一-固定域名">一、固定域名</h4>
+<p><code>ngrok -config=ngrok.yml -subdomain prefix 80</code></p>
+
+                    </div>
+                    <div class="toc-container">
+                        <ul class="markdownIt-TOC">
+<li>
+<ul>
+<li><a href="#%E6%89%80%E9%9C%80%E6%9D%90%E6%96%99">所需材料</a></li>
+<li><a href="#%E6%B5%8B%E8%AF%95%E7%8E%AF%E5%A2%83">测试环境</a></li>
+<li><a href="#%E6%AD%A5%E9%AA%A4">步骤</a>
+<ul>
+<li><a href="#1%E6%9B%B4%E6%96%B0">1.更新</a></li>
+<li><a href="#2%E5%AE%89%E8%A3%85git%E5%92%8Cgo">2.安装git和go</a></li>
+<li><a href="#3%E4%B8%8B%E8%BD%BD%E6%BA%90%E7%A0%81">3.下载源码</a></li>
+<li><a href="#4%E9%85%8D%E7%BD%AE%E5%9F%9F%E5%90%8D-%E7%94%9F%E6%88%90%E9%80%9A%E9%85%8D%E7%AC%A6%E8%AF%81%E4%B9%A6">4.配置域名 &amp; 生成通配符证书</a>
+<ul>
+<li><a href="#%E4%B8%80-%E5%91%BD%E4%BB%A4%E8%A1%8C%E7%94%9F%E6%88%90%E6%8E%A8%E8%8D%90">一、命令行生成（推荐）</a></li>
+<li><a href="#%E4%BA%8C-freesslcn-%E7%94%9F%E6%88%90">二、freessl.cn 生成</a></li>
+</ul>
+</li>
+<li><a href="#5%E9%85%8D%E7%BD%AE%E8%AF%81%E4%B9%A6">5.配置证书</a></li>
+<li><a href="#6%E7%BC%96%E8%AF%91%E6%9C%8D%E5%8A%A1%E7%AB%AF">6.编译服务端</a></li>
+<li><a href="#7%E7%BC%96%E8%AF%91%E5%AE%A2%E6%88%B7%E7%AB%AF">7.编译客户端</a>
+<ul>
+<li><a href="#%E4%B8%80-mac">一、Mac</a></li>
+<li><a href="#%E4%BA%8C-windows">二、Windows</a></li>
+<li><a href="#%E4%B8%89-linux">三、Linux</a></li>
+</ul>
+</li>
+<li><a href="#8%E5%90%AF%E5%8A%A8%E6%9C%8D%E5%8A%A1%E7%AB%AF">8.启动服务端</a></li>
+<li><a href="#9%E8%AE%BE%E7%BD%AE%E5%AE%A2%E6%88%B7%E7%AB%AF">9.设置客户端</a>
+<ul>
+<li><a href="#%E4%B8%80-%E5%88%9B%E5%BB%BA%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6">一、创建配置文件</a></li>
+<li><a href="#%E4%BA%8C-%E5%90%AF%E5%8A%A8%E6%9C%8D%E5%8A%A1">二、启动服务</a>
+<ul>
+<li><a href="#imaclinux">Ⅰ.Mac/Linux</a></li>
+<li><a href="#iiwindows">Ⅱ.Windows</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#10%E8%A1%A5%E5%85%85">10.补充</a>
+<ul>
+<li><a href="#%E4%B8%80-%E5%9B%BA%E5%AE%9A%E5%9F%9F%E5%90%8D">一、固定域名</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+                    </div>
+                </div>
+            </article>
+        </div>
+
+        
+            <div class="next-post">
+                <div class="next">下一篇</div>
+                <a href="https://tmk.im/post/letsencrypt-wildcard/">
+                    <h3 class="post-title">
+                        Let&#39;s Encrypt 通配符证书申请
+                    </h3>
+                </a>
+            </div>
+        
+
+        
+            
+
+            
+                <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/disqusjs@1.1.1/dist/disqusjs.css" />
+<script src="https://cdn.jsdelivr.net/npm/disqusjs@1.1.1/dist/disqus.min.js"></script>
+
+<div id="disqus_thread"></div>
+
+<script>
+  var options = {
+    shortname: 'marco-tan',
+    apikey: 'FGnM8aNTiwmiRXyL5lhPYJ95JlyNldmO4odvdGQ5KaXUyPUOM58d6mp7eF8XT2nd',
+  };
+  if ('https://disqus.skk.moe/disqus/') {
+    options.api = 'https://disqus.skk.moe/disqus/';
+  }
+  var dsqjs = new DisqusJS(options);
+</script>
+
+            
+        
+    </div>
+</div>
+</body>
+<script>
+  hljs.initHighlightingOnLoad();
+
+  var mainNavLinks = document.querySelectorAll('.markdownIt-TOC a');
+
+  window.addEventListener('scroll', function () {
+    var fromTop = window.scrollY;
+    mainNavLinks.forEach((link, index) => {
+      var section = document.getElementById(decodeURI(link.hash).substring(1));
+      var nextSection = null;
+      if (mainNavLinks[index + 1]) {
+        nextSection = document.getElementById(decodeURI(mainNavLinks[index + 1].hash).substring(1));
+      }
+      if (section.offsetTop <= fromTop) {
+        if (nextSection) {
+          if (nextSection.offsetTop > fromTop) {
+            link.classList.add('current');
+          } else {
+            link.classList.remove('current');
+          }
+        } else {
+          link.classList.add('current');
+        }
+      } else {
+        link.classList.remove('current');
+      }
+    });
+  });
+</script>
+<script>
+  // 固定侧边栏footer
+  var sidebar = document.getElementsByClassName('sidebar').item(0);
+  var header = sidebar.getElementsByClassName('site-header').item(0);
+  var footer = sidebar.getElementsByClassName('site-footer').item(0);
+  if (header.clientHeight + footer.clientHeight < sidebar.clientHeight) {
+    footer.classList.add('fix');
+  }
+  // 侧边栏开关
+  var handler = document.getElementById('drawer-handler');
+  handler.addEventListener('click', function () {
+    sidebar.classList.toggle('show');
+  });
+  var mainContent = document.getElementsByClassName('main-content').item(0);
+  mainContent.addEventListener('click', function () {
+    if (sidebar.classList.contains('show')) {
+      sidebar.classList.remove('show');
+    }
+  });
+</script>
+<script>
+  var _mtac = {'senseQuery': 1};
+  (function() {
+    var mta = document.createElement('script');
+    mta.src = '//pingjs.qq.com/h5/stats.js?v2.0.4';
+    mta.setAttribute('name', 'MTAH5');
+    mta.setAttribute('sid', '500716509');
+    mta.setAttribute('cid', '500716510');
+    var s = document.getElementsByTagName('script')[0];
+    s.parentNode.insertBefore(mta, s);
+  })();
+</script>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-163768698-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'UA-163768698-1');
+</script>
+
+</html>

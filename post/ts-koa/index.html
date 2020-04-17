@@ -1,0 +1,387 @@
+<html lang="zh">
+<head>
+    <meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+<title>使用TypeScript编写Koa应用 | Marco Tan</title>
+<meta name="description" content="Life is full of ups and downs." />
+<link rel="shortcut icon" href="https://tmk.im/favicon.ico" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.7.2/css/all.min.css" />
+<link rel="stylesheet" href="https://tmk.im/styles/main.css" />
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlightjs@9.12.0/styles/atom-one-dark.css" />
+    <script src="https://cdn.jsdelivr.net/npm/highlightjs@9.12.0/highlight.pack.min.js"></script>
+
+
+</head>
+<body>
+<div class="main">
+    <div class="sidebar">
+    <div class="site-header">
+    <a href="https://tmk.im">
+        <img class="avatar" src="https://tmk.im/images/avatar.png" alt="Avatar" />
+    </a>
+    <h1 class="site-title">
+        Marco Tan
+    </h1>
+    <p class="site-description">
+        Life is full of ups and downs.
+    </p>
+    <div class="menu-container">
+        
+            
+                <a href="/" class="menu">首页</a>
+            
+        
+            
+                <a href="/archives" class="menu">归档</a>
+            
+        
+            
+                <a href="/tags" class="menu">标签</a>
+            
+        
+            
+                <a href="/post/about" class="menu">关于</a>
+            
+        
+    </div>
+    <div class="social-container">
+        
+            
+                <a href="https://github.com/marco-tan" target="_blank">
+                    <i class="fab fa-github"></i>
+                </a>
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+    </div>
+</div>
+
+    <div class="site-footer">
+    Designed By Tmk.&lt;tmk#li.cm&gt; |
+    <a class="rss" href="https://tmk.im/atom.xml" target="_blank">RSS</a>
+</div>
+
+    <div id="drawer-handler" style="user-select: none"><i class="fa fa-bars"></i></div>
+</div>
+
+    <div class="main-content">
+        <div class="post-detail">
+            <article class="post">
+                <h2 class="post-title">使用TypeScript编写Koa应用</h2>
+                <div class="post-info">
+                    <span>2020-01-30</span>
+                    <span>4 min read</span>
+                    
+                        <a href="https://tmk.im/tag/hpzm3iy3q/" class="post-tag"># TypeScript</a>
+                    
+                        <a href="https://tmk.im/tag/ZT-lJ8saB2/" class="post-tag"># Koa</a>
+                    
+                </div>
+                
+                <div class="post-content-wrapper">
+                    <div class="post-content">
+                        <h2 id="1初始化node项目">1.初始化node项目</h2>
+<pre><code class="language-shell"># 初始化项目
+npm init
+# 安装TypeScript
+npm i typescript -D
+# 新建src目录
+mkdir src
+# 初始化TS配置
+tsc --init
+</code></pre>
+<h2 id="配置tsconfigjson">配置tsconfig.json</h2>
+<p><a href="https://www.typescriptlang.org/v2/en/tsconfig">如何配置？</a></p>
+<pre><code class="language-json">// /tsconfig.json
+{
+  &quot;compilerOptions&quot;: {
+    &quot;target&quot;: &quot;ES2017&quot;, 
+    &quot;module&quot;: &quot;commonjs&quot;,
+    &quot;lib&quot;: [&quot;ESNext&quot;],
+    &quot;outDir&quot;: &quot;./dist&quot;,
+    &quot;rootDir&quot;: &quot;./src&quot;,
+    &quot;strict&quot;: true, 
+    &quot;moduleResolution&quot;: &quot;node&quot;,
+    &quot;esModuleInterop&quot;: true,
+    &quot;experimentalDecorators&quot;: true,
+    &quot;emitDecoratorMetadata&quot;: true,
+    &quot;forceConsistentCasingInFileNames&quot;: true
+  },
+  &quot;include&quot;: [&quot;src/**/*&quot;],
+  &quot;exclude&quot;: [&quot;node_modules&quot;]
+}
+</code></pre>
+<h2 id="安装项目依赖">安装项目依赖</h2>
+<pre><code class="language-shell">npm i koa koa-router koa-body
+npm i @types/node @types/koa @types/koa-router -D  # 类型声明
+</code></pre>
+<h2 id="编写最简koa项目">编写最简Koa项目</h2>
+<p>在<code>src</code>目录下新建文件<code>index.ts</code></p>
+<pre><code class="language-javascript">// /src/index.ts
+import Koa from 'koa';
+import KoaBody from 'koa-body';
+const app = new Koa();
+app.use(KoaBody());
+app.use(async (ctx) =&gt; {
+    ctx.body = 'Hello, world!';
+});
+const PORT = process.env.PORT || 8080;
+app.listen(PORT, () =&gt; {
+    console.log(`The server is running at port ${PORT}`);
+});
+</code></pre>
+<p>编译并执行</p>
+<pre><code class="language-shell">tsc
+node ./dist/index.js
+</code></pre>
+<p>访问<code>http://localhost:8080</code></p>
+<h2 id="编写路由文件">编写路由文件</h2>
+<p>新建目录<code>routes</code>，并在目录下新建路由文件入口<code>index.ts</code></p>
+<pre><code class="language-javascript">// /src/routes/index.ts
+import KoaRouter from 'koa-router';
+import { readdirSync } from 'fs';
+import { join, basename } from 'path';
+
+const router = new KoaRouter();
+const files = readdirSync(__dirname);
+const filename = basename(__filename);
+
+files.forEach(async file =&gt; {
+  if (file !== filename) {
+    const r = (await import(join(__dirname, file))).default;
+    router.use(r.routes()).use(r.allowedMethods());
+  }
+});
+
+export default router;
+</code></pre>
+<p>新建<code>about.ts</code>路由文件</p>
+<pre><code class="language-javascript">// /src/routes/about.ts
+import KoaRouter from 'koa-router';
+
+const router = new KoaRouter({
+  prefix: '/about',
+});
+
+router.get('/', async (ctx) =&gt; {
+  ctx.body = 'About';
+});
+
+export default router;
+</code></pre>
+<p>最后修改一下主文件<code>index.ts</code>，引入路由</p>
+<pre><code class="language-javascript">// /src/index.ts
+import Koa from 'koa';
+import KoaBody from 'koa-body';
+import routers from './routes';
+
+const app = new Koa();
+app.use(KoaBody());
+
+app.use(routers.routes()).use(routers.allowedMethods());
+
+const PORT = process.env.PORT || 8080;
+app.listen(PORT, () =&gt; {
+    console.log(`The server is running at port ${PORT}`);
+});
+</code></pre>
+<p>编译并执行</p>
+<pre><code class="language-shell">tsc
+node ./dist/index.js
+</code></pre>
+<p>访问<code>http://localhost:8080/about</code></p>
+<h2 id="补充">补充</h2>
+<h3 id="在ctx上挂载自定义属性">在ctx上挂载自定义属性</h3>
+<p>新建<code>types/index.d.ts</code>类型声明文件</p>
+<pre><code class="language-javascript">// /src/typings/index.d.ts
+import { DefaultContext } from 'koa';
+export interface CustomContext extends DefaultContext {
+    custom: string
+}
+</code></pre>
+<p>在<code>new Koa()</code>时传入定义的接口，示例如下</p>
+<pre><code class="language-javascript">// /src/index.ts
+import Koa, { DefaultState } from 'koa';
+import { CustomContext } from './typings';
+
+const app = new Koa&lt;DefaultState, CustomContext&gt;();
+app.context.custom = '666';
+app.use(async (ctx, next) =&gt; {
+    console.log(ctx.custom);
+    await next();
+});
+</code></pre>
+<p>使用路由时，也需将接口传入，以便在路由中使用自定义属性</p>
+<pre><code class="language-javascript">// /src/routes/about.ts
+import KoaRouter from 'koa-router';
+import { DefaultState } from 'koa';
+import { CustomContext } from '../typings';
+
+const router = new KoaRouter&lt;DefaultState, CustomContext&gt;({
+  prefix: '/about',
+});
+
+router.get('/', async (ctx) =&gt; {
+  ctx.body = ctx.custom;
+});
+export default router;
+</code></pre>
+<p>自定义中间件同理</p>
+<h3 id="在global上挂载自定义属性">在global上挂载自定义属性</h3>
+<p>在 .d.ts 文件中声明</p>
+<pre><code class="language-javascript">// /src/typings/index.d.ts
+declare global {
+  namespace NodeJS {
+    interface Global {
+      app: any
+    }
+  }
+}
+</code></pre>
+<h3 id="调试">调试</h3>
+<pre><code class="language-shell">npm i ts-node-dev -D
+ts-node-dev --clear ./src/index.ts
+</code></pre>
+
+                    </div>
+                    <div class="toc-container">
+                        <ul class="markdownIt-TOC">
+<li>
+<ul>
+<li><a href="#1%E5%88%9D%E5%A7%8B%E5%8C%96node%E9%A1%B9%E7%9B%AE">1.初始化node项目</a></li>
+<li><a href="#%E9%85%8D%E7%BD%AEtsconfigjson">配置tsconfig.json</a></li>
+<li><a href="#%E5%AE%89%E8%A3%85%E9%A1%B9%E7%9B%AE%E4%BE%9D%E8%B5%96">安装项目依赖</a></li>
+<li><a href="#%E7%BC%96%E5%86%99%E6%9C%80%E7%AE%80koa%E9%A1%B9%E7%9B%AE">编写最简Koa项目</a></li>
+<li><a href="#%E7%BC%96%E5%86%99%E8%B7%AF%E7%94%B1%E6%96%87%E4%BB%B6">编写路由文件</a></li>
+<li><a href="#%E8%A1%A5%E5%85%85">补充</a>
+<ul>
+<li><a href="#%E5%9C%A8ctx%E4%B8%8A%E6%8C%82%E8%BD%BD%E8%87%AA%E5%AE%9A%E4%B9%89%E5%B1%9E%E6%80%A7">在ctx上挂载自定义属性</a></li>
+<li><a href="#%E5%9C%A8global%E4%B8%8A%E6%8C%82%E8%BD%BD%E8%87%AA%E5%AE%9A%E4%B9%89%E5%B1%9E%E6%80%A7">在global上挂载自定义属性</a></li>
+<li><a href="#%E8%B0%83%E8%AF%95">调试</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+                    </div>
+                </div>
+            </article>
+        </div>
+
+        
+            <div class="next-post">
+                <div class="next">下一篇</div>
+                <a href="https://tmk.im/post/ubuntu-encoding/">
+                    <h3 class="post-title">
+                        解决Ubuntu的中文乱码问题
+                    </h3>
+                </a>
+            </div>
+        
+
+        
+            
+
+            
+                <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/disqusjs@1.1.1/dist/disqusjs.css" />
+<script src="https://cdn.jsdelivr.net/npm/disqusjs@1.1.1/dist/disqus.min.js"></script>
+
+<div id="disqus_thread"></div>
+
+<script>
+  var options = {
+    shortname: 'marco-tan',
+    apikey: 'FGnM8aNTiwmiRXyL5lhPYJ95JlyNldmO4odvdGQ5KaXUyPUOM58d6mp7eF8XT2nd',
+  };
+  if ('https://disqus.skk.moe/disqus/') {
+    options.api = 'https://disqus.skk.moe/disqus/';
+  }
+  var dsqjs = new DisqusJS(options);
+</script>
+
+            
+        
+    </div>
+</div>
+</body>
+<script>
+  hljs.initHighlightingOnLoad();
+
+  var mainNavLinks = document.querySelectorAll('.markdownIt-TOC a');
+
+  window.addEventListener('scroll', function () {
+    var fromTop = window.scrollY;
+    mainNavLinks.forEach((link, index) => {
+      var section = document.getElementById(decodeURI(link.hash).substring(1));
+      var nextSection = null;
+      if (mainNavLinks[index + 1]) {
+        nextSection = document.getElementById(decodeURI(mainNavLinks[index + 1].hash).substring(1));
+      }
+      if (section.offsetTop <= fromTop) {
+        if (nextSection) {
+          if (nextSection.offsetTop > fromTop) {
+            link.classList.add('current');
+          } else {
+            link.classList.remove('current');
+          }
+        } else {
+          link.classList.add('current');
+        }
+      } else {
+        link.classList.remove('current');
+      }
+    });
+  });
+</script>
+<script>
+  // 固定侧边栏footer
+  var sidebar = document.getElementsByClassName('sidebar').item(0);
+  var header = sidebar.getElementsByClassName('site-header').item(0);
+  var footer = sidebar.getElementsByClassName('site-footer').item(0);
+  if (header.clientHeight + footer.clientHeight < sidebar.clientHeight) {
+    footer.classList.add('fix');
+  }
+  // 侧边栏开关
+  var handler = document.getElementById('drawer-handler');
+  handler.addEventListener('click', function () {
+    sidebar.classList.toggle('show');
+  });
+  var mainContent = document.getElementsByClassName('main-content').item(0);
+  mainContent.addEventListener('click', function () {
+    if (sidebar.classList.contains('show')) {
+      sidebar.classList.remove('show');
+    }
+  });
+</script>
+<script>
+  var _mtac = {'senseQuery': 1};
+  (function() {
+    var mta = document.createElement('script');
+    mta.src = '//pingjs.qq.com/h5/stats.js?v2.0.4';
+    mta.setAttribute('name', 'MTAH5');
+    mta.setAttribute('sid', '500716509');
+    mta.setAttribute('cid', '500716510');
+    var s = document.getElementsByTagName('script')[0];
+    s.parentNode.insertBefore(mta, s);
+  })();
+</script>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-163768698-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'UA-163768698-1');
+</script>
+
+</html>

@@ -1,0 +1,585 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+    <id>https://tmk.im</id>
+    <title>Marco Tan</title>
+    <updated>2020-04-17T16:45:20.172Z</updated>
+    <generator>https://github.com/jpmonette/feed</generator>
+    <link rel="alternate" href="https://tmk.im"/>
+    <link rel="self" href="https://tmk.im/atom.xml"/>
+    <subtitle>Life is full of ups and downs.</subtitle>
+    <logo>https://tmk.im/images/avatar.png</logo>
+    <icon>https://tmk.im/favicon.ico</icon>
+    <rights>All rights reserved 2020, Marco Tan</rights>
+    <entry>
+        <title type="html"><![CDATA[落地页实现]]></title>
+        <id>https://tmk.im/post/landing-page/</id>
+        <link href="https://tmk.im/post/landing-page/">
+        </link>
+        <updated>2020-03-11T09:03:19.000Z</updated>
+        <content type="html"><![CDATA[<h2 id="通过scheme唤起app">通过scheme唤起App</h2>
+<h3 id="方式一">方式一</h3>
+<pre><code class="language-javascript">window.location.href = `scheme://xxx`;
+</code></pre>
+<h3 id="方式二iframe">方式二(iframe)</h3>
+<pre><code class="language-javascript">const _iframe = document.createElement('iframe');
+_iframe.style.display = 'none';
+document.body.appendChild(_iframe);
+_iframe.src = `scheme://xxx`;
+window.setTimeout(function () {
+    document.body.removeChild(_iframe);
+}, 2000);
+</code></pre>
+<h2 id="判断用户是否安装应用未安装自动下载workaround">判断用户是否安装应用，未安装自动下载(workaround)</h2>
+<p>打开落地页时，浏览器会弹出是否打开应用的弹框，同时触发<code>blur</code>事件，未安装应用则不会弹出。可通过时间差来判断用户是否安装应用。</p>
+<pre><code class="language-javascript">const launchAppByIframe = (scheme: string, autoDownload: string | false = false) =&gt; {
+  let time = 0;
+  let shouldDownload = true;
+  if (autoDownload) {
+    window.addEventListener('blur', () =&gt; {
+      if (Date.now() - time &lt; 500) {
+        shouldDownload = false;
+      }
+    }, { once: true });
+  }
+  const _iframe = document.createElement('iframe');
+  _iframe.style.display = 'none';
+  _iframe.addEventListener('load', () =&gt; {
+    time = Date.now();
+    setTimeout(() =&gt; {
+      const triggered = localStorage.getItem('triggered');
+      if (autoDownload &amp;&amp; !triggered &amp;&amp; shouldDownload) {
+        window.location.href = autoDownload;
+        localStorage.setItem('triggered', '1');
+      }
+    }, 500);
+  });
+  document.body.appendChild(_iframe);
+  _iframe.src = scheme;
+  window.setTimeout(function () {
+    document.body.removeChild(_iframe);
+  }, 2000);
+}
+</code></pre>
+<h2 id="判断用户设备">判断用户设备</h2>
+<p>简易实现，更多请参考<a href="https://www.npmjs.com/package/ua-parser-js">ua-parser-js</a></p>
+<pre><code class="language-javascript">type IPlatform = 'Windows' | 'MacOS' | 'Android' | 'iOS';
+export const getPlatform = (defaultPlatform: IPlatform = 'Android'): IPlatform =&gt; {
+  const ua = window.navigator.userAgent.toLocaleLowerCase();
+  const matchMap: { [key in IPlatform]: RegExp } = {
+    Android: /x11|android|linux/,
+    iOS: /iphone|ipad|ipod/,
+    Windows: /windows/,
+    MacOS: /mac/,
+  };
+  const platforms = Object.keys(matchMap);
+  for (let p of platforms as IPlatform[]) {
+    if (matchMap[p].test(ua)) {
+      return p;
+    }
+  }
+  return defaultPlatform;
+}
+</code></pre>
+<h2 id="解析query">解析query</h2>
+<pre><code class="language-javascript">const getQuery = (): Record&lt;string, string&gt; =&gt; {
+  const query = window.location.search.slice(1);
+  if (!query) return {};
+  let data: Record&lt;string, string&gt; = {};
+  query.split('&amp;').forEach(kv =&gt; {
+    const keypair = kv.split('=');
+    data[keypair[0]] = keypair[1] || '';
+  });
+  return data;
+}
+</code></pre>
+<h2 id="判断是否在微信中打开">判断是否在微信中打开</h2>
+<p>以此显示popup，提示用户点击右上角，在Safari中打开</p>
+<pre><code class="language-javascript">const isInWechat = (): boolean =&gt; {
+  const ua = window.navigator.userAgent.toLocaleLowerCase();
+  return /micromessenger/.test(ua);
+};
+</code></pre>
+<h2 id="tips">Tips</h2>
+<h3 id="页面高度">页面高度</h3>
+<p>页面高度不宜设置为100vh，在手机Safari等浏览器中依然会出现滚动条。<br>
+解决办法</p>
+<pre><code class="language-css">html, body, #app {
+    height: 100%;
+}
+</code></pre>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[微信开发者工具安装Prettier格式化插件]]></title>
+        <id>https://tmk.im/post/wechat-devtool-install-pretiier/</id>
+        <link href="https://tmk.im/post/wechat-devtool-install-pretiier/">
+        </link>
+        <updated>2020-03-06T07:46:26.000Z</updated>
+        <content type="html"><![CDATA[<ul>
+<li>先在VSCode中安装Prettier</li>
+<li>打开<code>~/.vscode/extensions</code>目录，找到prettier的拓展文件夹</li>
+<li>打开微信开发者工具，选择菜单 「编辑」→「打开编辑器拓展目录」，将prettier的拓展文件夹复制到此目录</li>
+<li>选择「编辑」→「管理编辑器拓展...」，添加 &quot;esbenp.prettier-vscode&quot; （格式：package.json中的 ${publisher}.${name}）</li>
+<li>在开发者工具任意文件中右键，选择「格式化文档，方法是使用...」，选择Prettier</li>
+<li>在小程序项目中创建<code>.prettierrc</code>文件</li>
+</ul>
+<pre><code class="language-json">{
+  &quot;semi&quot;: true,
+  &quot;singleQuote&quot;: true,
+  &quot;trailingComma&quot;: &quot;es5&quot;
+}
+</code></pre>
+<p>参考：</p>
+<ul>
+<li><a href="https://developers.weixin.qq.com/community/develop/doc/000c8e132c47c8e19b99a4aa85b001">开发者工具功能更新</a></li>
+<li><a href="https://prettier.io/">Prettier</a></li>
+</ul>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[规范化 git commit message 并自动生成CHANGELOG]]></title>
+        <id>https://tmk.im/post/git-commit-msg/</id>
+        <link href="https://tmk.im/post/git-commit-msg/">
+        </link>
+        <updated>2020-02-08T14:35:33.000Z</updated>
+        <content type="html"><![CDATA[<p>初始化项目</p>
+<pre><code class="language-shell">npm init -y
+git init
+</code></pre>
+<p>安装依赖</p>
+<pre><code class="language-shell">npm i husky @commitlint/cli @commitlint/config-conventional conventional-changelog-cli -D
+</code></pre>
+<p>创建<code>commitlint.config.js</code>文件</p>
+<pre><code class="language-javascript">module.exports = {
+  extends: ['@commitlint/config-conventional'],
+  rules: {
+    'type-enum': [
+      2,
+      'always',
+      [
+        'feat', // 新功能（feature）
+        'fix', // 修补bug
+        'docs', // 文档（documentation）
+        'style', // 格式（不影响代码运行的变动）
+        'refactor', // 重构（即不是新增功能，也不是修改bug的代码变动）
+        'test', // 增加测试
+        'chore', // 构建过程或辅助工具的变动
+        'revert', // 回滚
+      ],
+    ],
+    'type-empty': [2, 'never'], // 提交不符合规范时,也可以提交,但是会有警告
+    'subject-empty': [2, 'never'], // 提交不符合规范时,也可以提交,但是会有警告
+    'subject-full-stop': [0, 'never'],
+    'subject-case': [0, 'never'],
+  },
+};
+</code></pre>
+<p>修改<code>package.json</code>文件</p>
+<pre><code class="language-shell">{
+  &quot;name&quot;: &quot;test&quot;,
+  &quot;version&quot;: &quot;1.0.0&quot;,
+  &quot;scripts&quot;: {},
+  &quot;husky&quot;: {
+    &quot;hooks&quot;: {
+      &quot;commit-msg&quot;: &quot;commitlint -E HUSKY_GIT_PARAMS&quot;,
+      &quot;pre-commit&quot;: &quot;conventional-changelog -p angular -i CHANGELOG.md -s -r 0 &amp;&amp; git add CHANGELOG.md&quot;
+    }
+  },
+  &quot;devDependencies&quot;: {
+    &quot;@commitlint/cli&quot;: &quot;^8.3.5&quot;,
+    &quot;@commitlint/config-conventional&quot;: &quot;^8.3.4&quot;,
+    &quot;conventional-changelog-cli&quot;: &quot;^2.0.31&quot;,
+    &quot;husky&quot;: &quot;^4.2.1&quot;
+  }
+}
+</code></pre>
+<p>问题：</p>
+<ul>
+<li>必须先git init，再安装husky</li>
+<li>最新的commit不会出现在CHANGELOG.md里，但在生成CHANGELOG.md时能在<code>.git/COMMIT_EDITMSG</code>里读到commit message信息</li>
+</ul>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[SSH 快速登录]]></title>
+        <id>https://tmk.im/post/ssh-login/</id>
+        <link href="https://tmk.im/post/ssh-login/">
+        </link>
+        <updated>2020-02-03T07:33:02.000Z</updated>
+        <content type="html"><![CDATA[<h2 id="省略ip-用户名-端口">省略IP、用户名、端口</h2>
+<p>编辑<code>~/.ssh/config</code>文件</p>
+<pre><code>Host alias1
+    HostName 6.6.6.6
+    User root
+    Port 22
+
+Host alias2
+    HostName 8.8.8.8
+    User root
+    Port 22
+</code></pre>
+<p>修改完成后使用<code>ssh alias1</code>，再输入密码即可登录</p>
+<h2 id="省略密码">省略密码</h2>
+<p>将<code>~/.ssh/id_rsa.pub</code>配置到服务器的<code>~/.ssh/authorized_keys</code>文件中，即可直接通过<code>ssh alias1</code>登录</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[使用TypeScript编写Koa应用]]></title>
+        <id>https://tmk.im/post/ts-koa/</id>
+        <link href="https://tmk.im/post/ts-koa/">
+        </link>
+        <updated>2020-01-30T06:44:03.000Z</updated>
+        <content type="html"><![CDATA[<h2 id="1初始化node项目">1.初始化node项目</h2>
+<pre><code class="language-shell"># 初始化项目
+npm init
+# 安装TypeScript
+npm i typescript -D
+# 新建src目录
+mkdir src
+# 初始化TS配置
+tsc --init
+</code></pre>
+<h2 id="配置tsconfigjson">配置tsconfig.json</h2>
+<p><a href="https://www.typescriptlang.org/v2/en/tsconfig">如何配置？</a></p>
+<pre><code class="language-json">// /tsconfig.json
+{
+  &quot;compilerOptions&quot;: {
+    &quot;target&quot;: &quot;ES2017&quot;, 
+    &quot;module&quot;: &quot;commonjs&quot;,
+    &quot;lib&quot;: [&quot;ESNext&quot;],
+    &quot;outDir&quot;: &quot;./dist&quot;,
+    &quot;rootDir&quot;: &quot;./src&quot;,
+    &quot;strict&quot;: true, 
+    &quot;moduleResolution&quot;: &quot;node&quot;,
+    &quot;esModuleInterop&quot;: true,
+    &quot;experimentalDecorators&quot;: true,
+    &quot;emitDecoratorMetadata&quot;: true,
+    &quot;forceConsistentCasingInFileNames&quot;: true
+  },
+  &quot;include&quot;: [&quot;src/**/*&quot;],
+  &quot;exclude&quot;: [&quot;node_modules&quot;]
+}
+</code></pre>
+<h2 id="安装项目依赖">安装项目依赖</h2>
+<pre><code class="language-shell">npm i koa koa-router koa-body
+npm i @types/node @types/koa @types/koa-router -D  # 类型声明
+</code></pre>
+<h2 id="编写最简koa项目">编写最简Koa项目</h2>
+<p>在<code>src</code>目录下新建文件<code>index.ts</code></p>
+<pre><code class="language-javascript">// /src/index.ts
+import Koa from 'koa';
+import KoaBody from 'koa-body';
+const app = new Koa();
+app.use(KoaBody());
+app.use(async (ctx) =&gt; {
+    ctx.body = 'Hello, world!';
+});
+const PORT = process.env.PORT || 8080;
+app.listen(PORT, () =&gt; {
+    console.log(`The server is running at port ${PORT}`);
+});
+</code></pre>
+<p>编译并执行</p>
+<pre><code class="language-shell">tsc
+node ./dist/index.js
+</code></pre>
+<p>访问<code>http://localhost:8080</code></p>
+<h2 id="编写路由文件">编写路由文件</h2>
+<p>新建目录<code>routes</code>，并在目录下新建路由文件入口<code>index.ts</code></p>
+<pre><code class="language-javascript">// /src/routes/index.ts
+import KoaRouter from 'koa-router';
+import { readdirSync } from 'fs';
+import { join, basename } from 'path';
+
+const router = new KoaRouter();
+const files = readdirSync(__dirname);
+const filename = basename(__filename);
+
+files.forEach(async file =&gt; {
+  if (file !== filename) {
+    const r = (await import(join(__dirname, file))).default;
+    router.use(r.routes()).use(r.allowedMethods());
+  }
+});
+
+export default router;
+</code></pre>
+<p>新建<code>about.ts</code>路由文件</p>
+<pre><code class="language-javascript">// /src/routes/about.ts
+import KoaRouter from 'koa-router';
+
+const router = new KoaRouter({
+  prefix: '/about',
+});
+
+router.get('/', async (ctx) =&gt; {
+  ctx.body = 'About';
+});
+
+export default router;
+</code></pre>
+<p>最后修改一下主文件<code>index.ts</code>，引入路由</p>
+<pre><code class="language-javascript">// /src/index.ts
+import Koa from 'koa';
+import KoaBody from 'koa-body';
+import routers from './routes';
+
+const app = new Koa();
+app.use(KoaBody());
+
+app.use(routers.routes()).use(routers.allowedMethods());
+
+const PORT = process.env.PORT || 8080;
+app.listen(PORT, () =&gt; {
+    console.log(`The server is running at port ${PORT}`);
+});
+</code></pre>
+<p>编译并执行</p>
+<pre><code class="language-shell">tsc
+node ./dist/index.js
+</code></pre>
+<p>访问<code>http://localhost:8080/about</code></p>
+<h2 id="补充">补充</h2>
+<h3 id="在ctx上挂载自定义属性">在ctx上挂载自定义属性</h3>
+<p>新建<code>types/index.d.ts</code>类型声明文件</p>
+<pre><code class="language-javascript">// /src/typings/index.d.ts
+import { DefaultContext } from 'koa';
+export interface CustomContext extends DefaultContext {
+    custom: string
+}
+</code></pre>
+<p>在<code>new Koa()</code>时传入定义的接口，示例如下</p>
+<pre><code class="language-javascript">// /src/index.ts
+import Koa, { DefaultState } from 'koa';
+import { CustomContext } from './typings';
+
+const app = new Koa&lt;DefaultState, CustomContext&gt;();
+app.context.custom = '666';
+app.use(async (ctx, next) =&gt; {
+    console.log(ctx.custom);
+    await next();
+});
+</code></pre>
+<p>使用路由时，也需将接口传入，以便在路由中使用自定义属性</p>
+<pre><code class="language-javascript">// /src/routes/about.ts
+import KoaRouter from 'koa-router';
+import { DefaultState } from 'koa';
+import { CustomContext } from '../typings';
+
+const router = new KoaRouter&lt;DefaultState, CustomContext&gt;({
+  prefix: '/about',
+});
+
+router.get('/', async (ctx) =&gt; {
+  ctx.body = ctx.custom;
+});
+export default router;
+</code></pre>
+<p>自定义中间件同理</p>
+<h3 id="在global上挂载自定义属性">在global上挂载自定义属性</h3>
+<p>在 .d.ts 文件中声明</p>
+<pre><code class="language-javascript">// /src/typings/index.d.ts
+declare global {
+  namespace NodeJS {
+    interface Global {
+      app: any
+    }
+  }
+}
+</code></pre>
+<h3 id="调试">调试</h3>
+<pre><code class="language-shell">npm i ts-node-dev -D
+ts-node-dev --clear ./src/index.ts
+</code></pre>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[解决Ubuntu的中文乱码问题]]></title>
+        <id>https://tmk.im/post/ubuntu-encoding/</id>
+        <link href="https://tmk.im/post/ubuntu-encoding/">
+        </link>
+        <updated>2020-01-09T04:49:10.000Z</updated>
+        <content type="html"><![CDATA[<h2 id="中文显示问题">中文显示问题</h2>
+<p>首先，安装中文支持包language-pack-zh-hans：</p>
+<pre><code class="language-shell">$ sudo apt-get install language-pack-zh-hans
+</code></pre>
+<p>然后，修改/etc/environment（在文件的末尾追加）：</p>
+<pre><code>LANG=&quot;zh_CN.UTF-8&quot;
+LANGUAGE=&quot;zh_CN:zh:en_US:en&quot;
+</code></pre>
+<p>再修改/var/lib/locales/supported.d/local(没有这个文件就新建，同样在末尾追加)：</p>
+<pre><code>en_US.UTF-8 UTF-8
+zh_CN.UTF-8 UTF-8
+zh_CN.GBK GBK
+zh_CN GB2312
+</code></pre>
+<p>最后，执行命令：</p>
+<pre><code class="language-shell">$ sudo locale-gen
+</code></pre>
+<p>对于中文乱码是空格的情况，安装中文字体解决。</p>
+<pre><code class="language-shell">$ sudo apt-get install fonts-droid-fallback ttf-wqy-zenhei ttf-wqy-microhei fonts-arphic-ukai fonts-arphic-uming
+</code></pre>
+<h2 id="中文输入问题">中文输入问题</h2>
+<p>修改或者新建<code>.inputrc</code>文件</p>
+<pre><code class="language-shell">vim ~/.inputrc
+</code></pre>
+<p>在结尾处增加下面四行</p>
+<pre><code>set meta-flag on
+set convert-meta off
+set input-meta on
+set output-meta on
+</code></pre>
+<p>加入环境变量</p>
+<pre><code class="language-shell">vim ~/.bashrc
+</code></pre>
+<p>在结尾处增加下面三行</p>
+<pre><code>export LANG=LANG=&quot;zh_CN.utf-8&quot;
+export LANGUAGE=&quot;zh_CN:zh:en_US:en&quot;
+export LC_ALL=&quot;zh_CN.utf-8&quot;
+</code></pre>
+<p>使配置生效：</p>
+<pre><code class="language-shell">source ~/.bashrc
+</code></pre>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[Nginx 搭建]]></title>
+        <id>https://tmk.im/post/nginx-setup/</id>
+        <link href="https://tmk.im/post/nginx-setup/">
+        </link>
+        <updated>2019-09-30T00:32:22.000Z</updated>
+        <content type="html"><![CDATA[<h2 id="搭建环境">搭建环境</h2>
+<p>CentOS 7</p>
+<h2 id="步骤">步骤</h2>
+<h3 id="1下载nginx源码">1.下载Nginx源码</h3>
+<pre><code class="language-bash">wget http://nginx.org/download/nginx-1.16.1.tar.gz
+tar xzvf nginx-1.16.1.tar.gz
+cd nginx-1.16.1
+</code></pre>
+<h3 id="2安装所需依赖">2.安装所需依赖</h3>
+<pre><code class="language-bash">yum install -y gcc
+yum install -y pcre pcre-devel
+yum install -y openssl openssl-devel
+</code></pre>
+<h3 id="3编译">3.编译</h3>
+<pre><code class="language-bash">./configure --with-http_ssl_module --with-http_v2_module
+make
+make install
+</code></pre>
+<h3 id="4创建软连接">4.创建软连接</h3>
+<pre><code class="language-bash">ln -s /usr/local/nginx/sbin/nginx /usr/sbin/nginx
+</code></pre>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[Ngrok + Let's Encrypt 实现内网穿透]]></title>
+        <id>https://tmk.im/post/ngrok-https/</id>
+        <link href="https://tmk.im/post/ngrok-https/">
+        </link>
+        <updated>2019-09-24T01:07:59.000Z</updated>
+        <content type="html"><![CDATA[<h2 id="所需材料">所需材料</h2>
+<ul>
+<li>一台有公网IP的服务器</li>
+<li>域名</li>
+<li>放行80、443、4443端口</li>
+</ul>
+<h2 id="测试环境">测试环境</h2>
+<p>Debian 9.9</p>
+<h2 id="步骤">步骤</h2>
+<h3 id="1更新">1.更新</h3>
+<p><code>apt-get update &amp;&amp; apt-get upgrade</code></p>
+<h3 id="2安装git和go">2.安装git和go</h3>
+<p><code>apt-get install build-essential git golang</code></p>
+<h3 id="3下载源码">3.下载源码</h3>
+<p><code>git clone https://github.com/inconshreveable/ngrok --depth=1</code></p>
+<h3 id="4配置域名-生成通配符证书">4.配置域名 &amp; 生成通配符证书</h3>
+<p><strong>解析<code>ngrok.example.com</code>和<code>*.ngrok.example.com</code> A记录到服务器IP</strong></p>
+<p>提供两种生成方式，任选其一，将<code>example.com</code>修改为自己的域名即可。</p>
+<h4 id="一-命令行生成推荐">一、命令行生成（推荐）</h4>
+<pre><code class="language-bash">wget https://dl.eff.org/certbot-auto
+chmod u+x certbot-auto
+sudo ./certbot-auto --server https://acme-v02.api.letsencrypt.org/directory --manual --preferred-challenges dns-01 certonly  -d &quot;*.ngrok.example.com,ngrok.example.com&quot;
+</code></pre>
+<p>按要求添加TXT记录，证书生成后保存在<code>/etc/letsencrypt/live/ngrok.example.com</code></p>
+<h4 id="二-freesslcn-生成">二、freessl.cn 生成</h4>
+<p>生成成功后会提供<code>CA证书</code>、<code>证书</code>、<code>私钥</code>文件，分别对应的文件名为<code>chain.pem</code>、<code>cert.pem</code>、<code>privkey.pem</code></p>
+<h3 id="5配置证书">5.配置证书</h3>
+<p>在<code>ngrok</code>目录下</p>
+<ol>
+<li>将<code>chain.pem</code>复制到<code>assets/client/tls/ngrokroot.crt</code></li>
+<li>将<code>cert.pem</code>复制到<code>ngrok</code>目录下</li>
+<li>将<code>privekey.pem</code>复制到<code>ngrok</code>目录下</li>
+</ol>
+<pre><code class="language-bash">cp /etc/letsencrypt/live/ngrok.example.com/chain.pem assets/client/tls/ngrokroot.crt
+cp /etc/letsencrypt/live/ngrok.example.com/cert.pem ./
+cp /etc/letsencrypt/live/ngrok.example.com/privkey.pem ./
+</code></pre>
+<h3 id="6编译服务端">6.编译服务端</h3>
+<pre><code class="language-bash">make release-server
+</code></pre>
+<p>编译成功后在<code>bin</code>目录下的<code>ngrokd</code>即为Ngrok服务端程序</p>
+<h3 id="7编译客户端">7.编译客户端</h3>
+<h4 id="一-mac">一、Mac</h4>
+<pre><code class="language-bash">GOOS=darwin GOARCH=amd64 make release-client
+</code></pre>
+<h4 id="二-windows">二、Windows</h4>
+<pre><code class="language-bash">GOOS=windows GOARCH=amd64 make release-client
+</code></pre>
+<h4 id="三-linux">三、Linux</h4>
+<pre><code class="language-bash">GOOS=linux GOARCH=amd64 make release-client
+</code></pre>
+<h3 id="8启动服务端">8.启动服务端</h3>
+<pre><code class="language-bash">./bin/ngrokd -tlsKey=privkey.pem -tlsCrt=cert.pem -domain=&quot;ngrok.example.com&quot;
+</code></pre>
+<p>后台运行在命令后加一个<code>&amp;</code>即可</p>
+<h3 id="9设置客户端">9.设置客户端</h3>
+<h4 id="一-创建配置文件">一、创建配置文件</h4>
+<pre><code class="language-yaml">server_addr: &quot;ngrok.example.com:4443&quot;  
+trust_host_root_certs: true  
+</code></pre>
+<p>保存为<code>ngrok.yml</code></p>
+<h4 id="二-启动服务">二、启动服务</h4>
+<p><code>80</code>可修改</p>
+<h5 id="imaclinux">Ⅰ.Mac/Linux</h5>
+<pre><code class="language-bash">./ngrok -config=ngrok.yml 80
+</code></pre>
+<h5 id="iiwindows">Ⅱ.Windows</h5>
+<p>创建一个<code>start.bat</code>文件</p>
+<pre><code class="language-bat">@echo on
+cd %cd%
+ngrok -config=ngrok.yml 80
+</code></pre>
+<h3 id="10补充">10.补充</h3>
+<h4 id="一-固定域名">一、固定域名</h4>
+<p><code>ngrok -config=ngrok.yml -subdomain prefix 80</code></p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[Let's Encrypt 通配符证书申请]]></title>
+        <id>https://tmk.im/post/letsencrypt-wildcard/</id>
+        <link href="https://tmk.im/post/letsencrypt-wildcard/">
+        </link>
+        <updated>2019-07-18T04:37:33.000Z</updated>
+        <content type="html"><![CDATA[<ol>
+<li>获取certbot-auto</li>
+</ol>
+<pre><code class="language-bash">wget https://dl.eff.org/certbot-auto
+</code></pre>
+<ol start="2">
+<li>添加执行权限</li>
+</ol>
+<pre><code class="language-bash">chmod u+x certbot-auto
+</code></pre>
+<ol start="3">
+<li>申请证书</li>
+</ol>
+<pre><code class="language-bash">sudo ./certbot-auto --server https://acme-v02.api.letsencrypt.org/directory --manual --preferred-challenges dns-01 certonly  -d &quot;*.your-domain.com&quot;
+</code></pre>
+<p>将<code>your-domain.com</code>替换成你的域名<br>
+4. 添加域名TXT记录</p>
+<p>添加一条 <code>_acme-challenge.your-domain.com</code> 的TXT记录，记录值为第三步生成的文本。<br>
+5. 申请结束</p>
+<p>可根据<code>dig _acme-challenge.your-domain.com txt</code>查询TXT记录是否生效，证书生成成功后保存在 <code>/etc/letsencrypt/live/your-domain.com/</code> 中，有效期为三个月，重新生成证书命令 <code>certbot-auto renew</code>。</p>
+]]></content>
+    </entry>
+</feed>
