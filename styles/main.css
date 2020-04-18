@@ -116,7 +116,7 @@ html {
   height: 100%;
 }
 body {
-  color: rgba(0, 0, 0, 0.86);
+  color: #404b69;
   font: 400 16px/1.42 -apple-system, BlinkMacSystemFont, "Helvetica Neue", "PingFang SC", "Hiragino Sans GB", "Droid Sans Fallback", "Microsoft YaHei", sans-serif;
   letter-spacing: 0.05em;
   overflow-x: hidden;
@@ -900,10 +900,14 @@ td {
 .tags-container .tag::before {
   content: '# ';
 }
+.current-tag-container {
+  margin-top: 20px;
+}
 .current-tag-container .title {
   text-align: center;
   font-size: 18px;
-  margin-bottom: 24px;
+  margin-bottom: 16px;
+  color: #283149;
 }
 .about-page {
   padding: 24px 32px;
