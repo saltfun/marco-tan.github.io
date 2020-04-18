@@ -2,7 +2,7 @@
 <head>
     <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
-<title>落地页实现 | Marco Tan</title>
+<title>微信开发者工具安装Prettier格式化插件 | Marco Tan</title>
 <meta name="description" content="Life is full of ups and downs." />
 <link rel="shortcut icon" href="https://tmk.im/favicon.ico" />
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.7.2/css/all.min.css" />
@@ -76,131 +76,38 @@
     <div class="main-content">
         <div class="post-detail">
             <article class="post">
-                <h2 class="post-title">落地页实现</h2>
+                <h2 class="post-title">微信开发者工具安装Prettier格式化插件</h2>
                 <div class="post-info">
-                    <span>2020-03-11</span>
-                    <span>3 min read</span>
+                    <span>2020-03-06</span>
+                    <span>1 min read</span>
                     
                 </div>
                 
                 <div class="post-content-wrapper">
                     <div class="post-content">
-                        <h2 id="通过scheme唤起app">通过scheme唤起App</h2>
-<h3 id="方式一">方式一</h3>
-<pre><code class="language-javascript">window.location.href = `scheme://xxx`;
-</code></pre>
-<h3 id="方式二iframe">方式二(iframe)</h3>
-<pre><code class="language-javascript">const _iframe = document.createElement('iframe');
-_iframe.style.display = 'none';
-document.body.appendChild(_iframe);
-_iframe.src = `scheme://xxx`;
-window.setTimeout(function () {
-    document.body.removeChild(_iframe);
-}, 2000);
-</code></pre>
-<h2 id="判断用户是否安装应用未安装自动下载workaround">判断用户是否安装应用，未安装自动下载(workaround)</h2>
-<p>打开落地页时，浏览器会弹出是否打开应用的弹框，同时触发<code>blur</code>事件，未安装应用则不会弹出。可通过时间差来判断用户是否安装应用。</p>
-<pre><code class="language-javascript">const launchAppByIframe = (scheme: string, autoDownload: string | false = false) =&gt; {
-  let time = 0;
-  let shouldDownload = true;
-  if (autoDownload) {
-    window.addEventListener('blur', () =&gt; {
-      if (Date.now() - time &lt; 500) {
-        shouldDownload = false;
-      }
-    }, { once: true });
-  }
-  const _iframe = document.createElement('iframe');
-  _iframe.style.display = 'none';
-  _iframe.addEventListener('load', () =&gt; {
-    time = Date.now();
-    setTimeout(() =&gt; {
-      const triggered = localStorage.getItem('triggered');
-      if (autoDownload &amp;&amp; !triggered &amp;&amp; shouldDownload) {
-        window.location.href = autoDownload;
-        localStorage.setItem('triggered', '1');
-      }
-    }, 500);
-  });
-  document.body.appendChild(_iframe);
-  _iframe.src = scheme;
-  window.setTimeout(function () {
-    document.body.removeChild(_iframe);
-  }, 2000);
+                        <ul>
+<li>先在VSCode中安装Prettier</li>
+<li>打开<code>~/.vscode/extensions</code>目录，找到prettier的拓展文件夹</li>
+<li>打开微信开发者工具，选择菜单 「编辑」→「打开编辑器拓展目录」，将prettier的拓展文件夹复制到此目录</li>
+<li>选择「编辑」→「管理编辑器拓展...」，添加 &quot;esbenp.prettier-vscode&quot; （格式：package.json中的 ${publisher}.${name}）</li>
+<li>在开发者工具任意文件中右键，选择「格式化文档，方法是使用...」，选择Prettier</li>
+<li>在小程序项目中创建<code>.prettierrc</code>文件</li>
+</ul>
+<pre><code class="language-json">{
+  &quot;semi&quot;: true,
+  &quot;singleQuote&quot;: true,
+  &quot;trailingComma&quot;: &quot;es5&quot;
 }
 </code></pre>
-<h2 id="判断用户设备">判断用户设备</h2>
-<p>简易实现，更多请参考<a href="https://www.npmjs.com/package/ua-parser-js">ua-parser-js</a></p>
-<pre><code class="language-javascript">type IPlatform = 'Windows' | 'MacOS' | 'Android' | 'iOS';
-export const getPlatform = (defaultPlatform: IPlatform = 'Android'): IPlatform =&gt; {
-  const ua = window.navigator.userAgent.toLocaleLowerCase();
-  const matchMap: { [key in IPlatform]: RegExp } = {
-    Android: /x11|android|linux/,
-    iOS: /iphone|ipad|ipod/,
-    Windows: /windows/,
-    MacOS: /mac/,
-  };
-  const platforms = Object.keys(matchMap);
-  for (let p of platforms as IPlatform[]) {
-    if (matchMap[p].test(ua)) {
-      return p;
-    }
-  }
-  return defaultPlatform;
-}
-</code></pre>
-<h2 id="解析query">解析query</h2>
-<pre><code class="language-javascript">const getQuery = (): Record&lt;string, string&gt; =&gt; {
-  const query = window.location.search.slice(1);
-  if (!query) return {};
-  let data: Record&lt;string, string&gt; = {};
-  query.split('&amp;').forEach(kv =&gt; {
-    const keypair = kv.split('=');
-    data[keypair[0]] = keypair[1] || '';
-  });
-  return data;
-}
-</code></pre>
-<h2 id="判断是否在微信中打开">判断是否在微信中打开</h2>
-<p>以此显示popup，提示用户点击右上角，在Safari中打开</p>
-<pre><code class="language-javascript">const isInWechat = (): boolean =&gt; {
-  const ua = window.navigator.userAgent.toLocaleLowerCase();
-  return /micromessenger/.test(ua);
-};
-</code></pre>
-<h2 id="tips">Tips</h2>
-<h3 id="页面高度">页面高度</h3>
-<p>页面高度不宜设置为100vh，在手机Safari等浏览器中依然会出现滚动条。<br>
-解决办法</p>
-<pre><code class="language-css">html, body, #app {
-    height: 100%;
-}
-</code></pre>
+<p>参考：</p>
+<ul>
+<li><a href="https://developers.weixin.qq.com/community/develop/doc/000c8e132c47c8e19b99a4aa85b001">开发者工具功能更新</a></li>
+<li><a href="https://prettier.io/">Prettier</a></li>
+</ul>
 
                     </div>
                     <div class="toc-container">
-                        <ul class="markdownIt-TOC">
-<li>
-<ul>
-<li><a href="#%E9%80%9A%E8%BF%87scheme%E5%94%A4%E8%B5%B7app">通过scheme唤起App</a>
-<ul>
-<li><a href="#%E6%96%B9%E5%BC%8F%E4%B8%80">方式一</a></li>
-<li><a href="#%E6%96%B9%E5%BC%8F%E4%BA%8Ciframe">方式二(iframe)</a></li>
-</ul>
-</li>
-<li><a href="#%E5%88%A4%E6%96%AD%E7%94%A8%E6%88%B7%E6%98%AF%E5%90%A6%E5%AE%89%E8%A3%85%E5%BA%94%E7%94%A8%E6%9C%AA%E5%AE%89%E8%A3%85%E8%87%AA%E5%8A%A8%E4%B8%8B%E8%BD%BDworkaround">判断用户是否安装应用，未安装自动下载(workaround)</a></li>
-<li><a href="#%E5%88%A4%E6%96%AD%E7%94%A8%E6%88%B7%E8%AE%BE%E5%A4%87">判断用户设备</a></li>
-<li><a href="#%E8%A7%A3%E6%9E%90query">解析query</a></li>
-<li><a href="#%E5%88%A4%E6%96%AD%E6%98%AF%E5%90%A6%E5%9C%A8%E5%BE%AE%E4%BF%A1%E4%B8%AD%E6%89%93%E5%BC%80">判断是否在微信中打开</a></li>
-<li><a href="#tips">Tips</a>
-<ul>
-<li><a href="#%E9%A1%B5%E9%9D%A2%E9%AB%98%E5%BA%A6">页面高度</a></li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-
+                        
                     </div>
                 </div>
             </article>
@@ -209,9 +116,9 @@ export const getPlatform = (defaultPlatform: IPlatform = 'Android'): IPlatform =
         
             <div class="next-post">
                 <div class="next">下一篇</div>
-                <a href="https://tmk.im/post/wechat-devtool-install-prettier/">
+                <a href="https://tmk.im/post/git-commit-msg/">
                     <h3 class="post-title">
-                        微信开发者工具安装Prettier格式化插件
+                        规范化 git commit message 并自动生成CHANGELOG
                     </h3>
                 </a>
             </div>
