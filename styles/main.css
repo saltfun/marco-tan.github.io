@@ -113,15 +113,18 @@ summary {
 }
 html {
   font-size: 58%;
+  height: 100%;
 }
 body {
   color: rgba(0, 0, 0, 0.86);
   font: 400 16px/1.42 -apple-system, BlinkMacSystemFont, "Helvetica Neue", "PingFang SC", "Hiragino Sans GB", "Droid Sans Fallback", "Microsoft YaHei", sans-serif;
   letter-spacing: 0.05em;
   overflow-x: hidden;
+  height: 100%;
+  background: #ebf0f6;
 }
 a {
-  color: rgba(0, 0, 0, 0.98);
+  color: #404b69;
   text-decoration: none;
   transition: all 0.3s;
 }
@@ -149,9 +152,8 @@ td {
   padding: 0;
 }
 .main {
-  min-height: 100vh;
+  min-height: 100%;
   margin: 0 auto;
-  background: #fff;
 }
 .main .sidebar {
   position: fixed;
@@ -159,14 +161,16 @@ td {
   top: 0;
   bottom: 0;
   width: 300px;
-  height: 100vh;
-  border-right: 1px solid #f1f2f3;
-  background: #fff;
+  height: 100%;
+  background: #283149;
   transition: all 0.3s cubic-bezier(0.78, 0.14, 0.15, 0.86);
   z-index: 99;
 }
-.main .sidebar .site-header {
-  background: #fff;
+.main .sidebar .social-container .fab {
+  transition: all 0.3s ease;
+}
+.main .sidebar .social-container .fab:hover {
+  color: #40A9FF;
 }
 .main .sidebar .site-footer.fix {
   position: absolute;
@@ -183,7 +187,7 @@ td {
   text-align: center;
   top: 72px;
   right: -40px;
-  background: #fff;
+  background: #fafafa;
   border-radius: 0 4px 4px 0;
   box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
   cursor: pointer;
@@ -250,11 +254,12 @@ td {
 .site-header .site-title {
   font-size: 32px;
   font-weight: bold;
+  color: #ced4da;
 }
 .site-header .site-description {
   font-size: 16px;
   padding: 24px;
-  color: #495057;
+  color: #868e96;
 }
 .site-header .menu-container {
   display: flex;
@@ -266,6 +271,10 @@ td {
   padding: 8px 16px;
   flex-shrink: 0;
   font-weight: 600;
+  color: #adb5bd;
+}
+.site-header .menu-container a.menu:hover {
+  color: #40A9FF;
 }
 .site-header .avatar {
   margin-bottom: 24px;
@@ -280,6 +289,12 @@ td {
 .site-header .social-container a {
   margin: 4px 8px;
   color: #868e96;
+}
+.site-footer .rss {
+  color: #868e96;
+}
+.site-footer .rss:hover {
+  color: #40a9ff;
 }
 @media (max-width: 600px) {
   .site-header {
@@ -407,6 +422,7 @@ td {
   padding: 24px 0;
   font-weight: 900;
   letter-spacing: 0.02em;
+  color: #404b69;
 }
 .post-detail .post .post-info {
   text-align: center;
@@ -431,6 +447,7 @@ td {
 .post-detail .post .post-content {
   width: 100%;
   font-family: "Droid Serif", "PingFang SC", "Hiragino Sans GB", "Droid Sans Fallback", "Microsoft YaHei", sans-serif;
+  color: #404b69;
 }
 .post-detail .post .post-content h1 {
   font-size: 2.2em;
@@ -465,7 +482,6 @@ td {
 }
 .post-detail .post .post-content h4 {
   font-weight: 700;
-  text-transform: uppercase;
   font-size: 1.1em;
   line-height: 1.4;
   margin: 10px 0 5px;
@@ -477,7 +493,6 @@ td {
 }
 .post-detail .post .post-content h5 {
   font-weight: bold;
-  text-transform: uppercase;
 }
 .post-detail .post .post-content h6 {
   font-weight: normal;
@@ -788,6 +803,7 @@ td {
   top: 32px;
   width: 200px;
   font-size: 12px;
+  transition: all 0.3s ease;
 }
 .toc-container .markdownIt-TOC:before {
   content: "";
@@ -810,6 +826,7 @@ td {
   padding: 4px;
   display: block;
   transition: all 0.3s;
+  border-radius: 2px;
 }
 .toc-container li a:hover {
   background: #fafafa;
@@ -849,7 +866,6 @@ td {
 }
 .archives-container .post .post-title {
   font-size: 18px;
-  font-weight: 900;
   letter-spacing: 0.02em;
 }
 .archives-container .post .time {
@@ -894,37 +910,3 @@ td {
   padding: 24px;
   color: #868e96;
 }
-
-      .post-container .post .post-title {
-        text-align: center;
-      }
-      .post-container .post .post-info {
-        text-align: center;
-      }
-      .post-detail .post .post-title {
-        text-align: center;
-      }
-      .post-detail .post .post-info {
-        text-align: center;
-      }
-    
-      body {
-        font-family: -apple-system,BlinkMacSystemFont,'Helvetica Neue','PingFang SC','Hiragino Sans GB','Droid Sans Fallback','Microsoft YaHei',sans-serif;
-      }
-    
-      .sidebar {
-        background: #ffffff;
-      }
-    
-      .main {
-        background: #ffffff;
-      }
-    
-      body {
-        background: #ffffff;
-      }
-    
-      a:hover {
-        color: #006CFF;
-      }
-    
