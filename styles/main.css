@@ -290,12 +290,6 @@ td {
   margin: 4px 8px;
   color: #868e96;
 }
-.site-footer .rss {
-  color: #868e96;
-}
-.site-footer .rss:hover {
-  color: #40a9ff;
-}
 @media (max-width: 600px) {
   .site-header {
     padding: 24px 0 0;
@@ -917,4 +911,11 @@ td {
   text-align: center;
   padding: 24px;
   color: #868e96;
+  z-index: -1;
+}
+.site-footer .rss {
+  color: #868e96;
+}
+.site-footer .rss:hover {
+  color: #40a9ff;
 }
